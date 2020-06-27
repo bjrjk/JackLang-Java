@@ -1,0 +1,25 @@
+int n;
+int[50] arr;
+int input(){
+	int i;
+	i=0;
+	while(i<n){
+		arr[i]=readInt();
+		i=i+1;
+	}
+}
+int output(){
+	int i;
+	i=0;
+	while(i<n){
+		printInt(arr[i]+1);
+		printSpace();
+		i=i+1;
+	}
+	printLn();
+}
+int main(){
+	n=readInt();
+	input();
+	output();
+}

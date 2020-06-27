@@ -1,0 +1,11 @@
+int dfs(int x){
+	if(x==0)return 0;
+	printInt(x);
+	printSpace();
+	return dfs(x-1)+1;
+}
+int main(){
+	int n;
+	n=readInt();
+	dfs(n);
+}
