@@ -1,0 +1,17 @@
+int main(){
+	int num;
+	int tmp;
+	int tmp2;
+	num=readInt();
+	if(num==0){
+		printInt(0);
+		return 0;
+	}
+	while(num){
+		tmp2=num/10*10;
+		tmp=num-tmp2;
+		printInt(tmp);
+		num=num/10;
+	}
+	return 1;
+}

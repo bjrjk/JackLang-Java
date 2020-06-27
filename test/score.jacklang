@@ -1,0 +1,7 @@
+int main(){
+	int score;
+	score=readInt();
+	if(score<60)printInt(0);
+	else if(score<80)printInt(3);
+	else printInt(5);
+}
