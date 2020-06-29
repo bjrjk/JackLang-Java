@@ -1,0 +1,6 @@
+int main(){
+	int n;
+	n=readInt();
+	n=-n;
+	printInt(n);
+}

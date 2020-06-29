@@ -404,7 +404,7 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 	public Integer visitBoolAND(JackLangParser.BoolANDContext ctx) { 
 		Integer r1=visit(ctx.expr(0));
 		Integer r2=visit(ctx.expr(1));
-		if(!r1.equals(0)||!r2.equals(0))return 1;
+		if(!r1.equals(0)&&!r2.equals(0))return 1;
 		else return 0;
 	}
 	@Override 
