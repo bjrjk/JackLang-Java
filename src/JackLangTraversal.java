@@ -7,6 +7,8 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 	private ArrayList<HashMap<String, Object>> runtimeStack=new ArrayList<HashMap<String,Object>>();
 	private HashMap<String,Object> globalMemory=new HashMap<String,Object>();
 	private Scanner scanner=new Scanner(System.in);
+	private final static int GLOBAL_DECLARE=1;
+	private final static int LOCAL_DECLARE=2;
 	
 	private void printTraceStack() {
 		System.err.println("Tracestack:");
@@ -140,6 +142,48 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 		}
 	}
 	
+	private void declareInteger(int declType, String name, int value) {
+		if(declType==GLOBAL_DECLARE) {
+			if(globalMemory.containsKey(name))
+				throwError("CompileError: Define Variable Multiple times(Global, int) aren't allowed. Variable name: "+name);
+			else globalMemory.put(name, 0);
+		}else if(declType==LOCAL_DECLARE) {
+			HashMap<String, Object> curStorage=runtimeStack.get(runtimeStack.size()-1);
+			if(curStorage.containsKey(name))
+				throwError("CompilerError: Define Variable Multiple times(Local Stack, int) aren't allowed. Variable name: "+name);
+			else curStorage.put(name, 0);
+		}else {
+			throwError("InternalError: declareInteger. Please report this incident to the developer!");
+		}
+	}
+	private ArrayList<Integer> declareArray(int declType, String name, int size) {
+		if(declType==GLOBAL_DECLARE) {
+			if(globalMemory.containsKey(name)) {
+				throwError("CompileError: Define Variable Multiple times(Global, Array) aren't allowed. Variable name: "+name);
+				return null;
+			}else {
+				ArrayList<Integer> arr=new ArrayList<Integer>(size);
+				for(int j=0;j<size;j++)arr.add(0);
+				globalMemory.put(name, arr);
+				return arr;
+			}
+		}else if(declType==LOCAL_DECLARE) {
+			HashMap<String, Object> curStorage=runtimeStack.get(runtimeStack.size()-1);
+			if(curStorage.containsKey(name)) {
+				throwError("CompilerError: Define Variable Multiple times(Local Stack, Array) aren't allowed. Variable name: "+name);
+				return null;
+			}else {
+				ArrayList<Integer> arr=new ArrayList<Integer>(size);
+				for(int i=0;i<size;i++)arr.add(0);
+				curStorage.put(name, arr);
+				return arr;
+			}
+		}else {
+			throwError("InternalError: declareArray. Please report this incident to the developer!");
+			return null;
+		}
+	}
+	
 	private int readInt(){
 		if(!scanner.hasNextInt())throwError("RuntimeError: Unable to read an integer from STDIN.");
 		return scanner.nextInt();
@@ -164,17 +208,14 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 		}
 		for(int i=0;i<ctx.varDeclare().size();i++) {
 			JackLangParser.DeclareContext curDeclare=ctx.varDeclare(i).declare();
-			if(globalMemory.containsKey(curDeclare.IDENTIFIER().getText()))
-				throwError("CompileError: Define Variable Multiple times(Global) aren't allowed. Variable name: "+curDeclare.IDENTIFIER().getText());
-			else {
+			for(int j=0;j<curDeclare.IDENTIFIER().size();j++) {
+				String name=curDeclare.IDENTIFIER(j).getText();
 				if(curDeclare.type() instanceof JackLangParser.ArrayTypeContext) {
 					JackLangParser.ArrayTypeContext arrayTypeCon=(JackLangParser.ArrayTypeContext)curDeclare.type();
-					int arrSize=Integer.valueOf(arrayTypeCon.INT().getText());
-					ArrayList<Integer> arr=new ArrayList<Integer>(arrSize);
-					for(int j=0;j<arrSize;j++)arr.add(0);
-					globalMemory.put(curDeclare.IDENTIFIER().getText(), arr);
+					int size=Integer.valueOf(arrayTypeCon.INT().getText());
+					declareArray(GLOBAL_DECLARE,name,size);
 				}else if(curDeclare.type() instanceof JackLangParser.IntTypeContext) {
-					globalMemory.put(curDeclare.IDENTIFIER().getText(), 0);
+					declareInteger(GLOBAL_DECLARE,name,0);
 				}else {
 					throwError("CompileError: Unknown DataType(Global)!");
 				}
@@ -188,7 +229,7 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 		runtimeStack.add(storage);
 		int ret=visitFunction(funcMain);
 		traceStack.remove(traceStack.size()-1);
-		System.out.println("Program terminated with return code "+ret);
+		System.out.println("\nProgram terminated with return code "+ret);
 		return ret; 
 	}
 	
@@ -203,19 +244,14 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 	}
 	@Override 
 	public Integer visitDeclare(JackLangParser.DeclareContext ctx) { 
-		HashMap<String, Object> curStorage=runtimeStack.get(runtimeStack.size()-1);
-		if(curStorage.containsKey(ctx.IDENTIFIER().getText()))
-			throwError("CompilerError: Define Variable Multiple times(Local Stack) aren't allowed. Variable name: "+ctx.IDENTIFIER().getText());
-		else {
+		for(int i=0;i<ctx.IDENTIFIER().size();i++) {
+			String name=ctx.IDENTIFIER(i).getText();
 			if(ctx.type() instanceof JackLangParser.ArrayTypeContext) {
 				JackLangParser.ArrayTypeContext atCon=(JackLangParser.ArrayTypeContext)ctx.type();
-				String arrName=ctx.IDENTIFIER().getText();
-				int arrSize=Integer.valueOf(atCon.INT().getText());
-				ArrayList<Integer> arr=new ArrayList<Integer>(arrSize);
-				for(int i=0;i<arrSize;i++)arr.add(0);
-				curStorage.put(arrName, arr);
+				int size=Integer.valueOf(atCon.INT().getText());
+				declareArray(LOCAL_DECLARE,name,size);
 			}else if(ctx.type() instanceof JackLangParser.IntTypeContext) {
-				curStorage.put(ctx.IDENTIFIER().getText(), 0);
+				declareInteger(LOCAL_DECLARE,name,0);
 			}else {
 				throwError("CompileError: Unknown DataType(Local Stack)!");
 			}

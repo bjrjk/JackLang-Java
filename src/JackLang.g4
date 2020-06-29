@@ -1,11 +1,10 @@
 grammar JackLang; 
 program		:	(varDeclare | function)+ 							;
-// Do not support Array parameters
 function	:	BASICTYPE IDENTIFIER '(' parameters? ')' block		;
 parameters	:	parameter (',' parameter)* 							;
 parameter	:	BASICTYPE IDENTIFIER								;
 varDeclare	:	declare ';' 										;
-declare		:	type IDENTIFIER 									;
+declare		:	type IDENTIFIER (',' IDENTIFIER)*					;
 type		:	BASICTYPE '[' INT ']'								# arrayType
 			|	BASICTYPE											# intType
 			;

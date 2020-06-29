@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 public class Main {
-
 	public static void main(String[] args) throws IOException {
 		String filename=args[0];
 		System.out.println("Input JackLang FileName: "+ filename);
@@ -24,7 +23,7 @@ public class Main {
         try {
         	eval.visit(tree);
         }catch(Exception e) {
-        	System.err.println("An Exception occured, Program terminated.");
+        	System.err.println("An Exception occured, Program terminated. Please report this incident to developer.");
         }
 	}
 }
