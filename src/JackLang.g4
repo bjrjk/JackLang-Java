@@ -1,15 +1,11 @@
 grammar JackLang; 
-prog		:	(varDeclare | func)+ 								# program
-			;
+program		:	(varDeclare | function)+ 							;
 // Do not support Array parameters
-func		:	BASICTYPE IDENTIFIER '(' parameters? ')' block		# function
-			;
-parameters	:	declare (',' declare)* 								# paras
-			;
-varDeclare	:	declare ';' 										# varDecl
-			;
-declare		:	type IDENTIFIER 									# decl
-			;
+function	:	BASICTYPE IDENTIFIER '(' parameters? ')' block		;
+parameters	:	parameter (',' parameter)* 							;
+parameter	:	BASICTYPE IDENTIFIER								;
+varDeclare	:	declare ';' 										;
+declare		:	type IDENTIFIER 									;
 type		:	BASICTYPE '[' INT ']'								# arrayType
 			|	BASICTYPE											# intType
 			;
@@ -30,20 +26,21 @@ expr		:	'(' expr ')'										# parenExpr
 			|	IDENTIFIER											# identifier
 			|	'-' expr											# unaryMinus
 			|	'!' expr											# boolNOT
-			|	expr op=(MUL|DIV) expr								# MULDIV
+			|	expr op=(MUL|DIV|MOD) expr							# MULDIV
 			|	expr op=(ADD|SUB) expr								# ADDSUB
 			|	expr op=(LT|LE|GE|GT) expr							# compareSize
 			|	expr op=(EQ|NE) expr								# compareEquality
 			|	expr '&&' expr										# boolAND
 			|	expr '||' expr										# boolOR
 			;
-exprList	:	expr (',' expr)* ;
+exprList	:	expr (',' expr)* 									;
 
 BASICTYPE	:	'int' ;
 ADD			:	'+' ;
 SUB			:	'-' ;
 MUL			:	'*' ;
 DIV			:	'/' ;
+MOD			:	'%' ;
 EQ			:	'==' ;
 NE			:	'!=' ;
 LT			:	'<' ;

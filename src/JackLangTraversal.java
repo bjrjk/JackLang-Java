@@ -11,21 +11,32 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 	private void printTraceStack() {
 		System.err.println("Tracestack:");
 		for(int i=traceStack.size()-1;i>=0;i--) {
-			System.err.printf("at %s %s(%s)\n", 
+			System.err.printf("\tat %s %s(", 
 					traceStack.get(i).BASICTYPE().getText(),
-					traceStack.get(i).IDENTIFIER().getText(),
-					traceStack.get(i).parameters()!=null?traceStack.get(i).parameters().getText():""
+					traceStack.get(i).IDENTIFIER().getText()
 					);
+			if(traceStack.get(i).parameters()!=null) {
+				for(int j=0;j<traceStack.get(i).parameters().parameter().size();j++) {
+					if(j!=0)System.err.printf(",");
+					String key=traceStack.get(i).parameters().parameter(j).IDENTIFIER().getText();
+					System.err.printf("%s=%s",
+							key,
+							runtimeStack.get(i).get(key).toString()
+							);
+				}
+			}
+			System.err.printf(")\n");
 		}
 	}
 	private void throwError(String errMessage){
+		System.err.println();
 		System.err.println(errMessage);
 		printTraceStack();
 		System.exit(1);
 	}
 	
 	private HashMap<String, Object> createRuntimeStorage(){
-		if(runtimeStack.size()>250)throwError("RuntimeError: StackOverFlow: More than 250 Function Calls.");
+		if(runtimeStack.size()>50)throwError("RuntimeError: StackOverFlow: More than 50 Function Calls.");
 		HashMap<String, Object> retVal=new HashMap<String, Object>();
 		return retVal;
 	}
@@ -145,14 +156,14 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 	
 	@Override 
 	public Integer visitProgram(JackLangParser.ProgramContext ctx) {
-		for(int i=0;i<ctx.func().size();i++) {
-			JackLangParser.FunctionContext curFunc=(JackLangParser.FunctionContext)ctx.func(i);
+		for(int i=0;i<ctx.function().size();i++) {
+			JackLangParser.FunctionContext curFunc=ctx.function(i);
 			if(functionList.containsKey(curFunc.IDENTIFIER().getText()))
 				throwError("CompileError: Overload isn't allowed. Function name: "+curFunc.IDENTIFIER().getText());
 			else functionList.put(curFunc.IDENTIFIER().getText(), curFunc);
 		}
 		for(int i=0;i<ctx.varDeclare().size();i++) {
-			JackLangParser.DeclContext curDeclare=(JackLangParser.DeclContext)((JackLangParser.VarDeclContext)ctx.varDeclare(i)).declare();
+			JackLangParser.DeclareContext curDeclare=ctx.varDeclare(i).declare();
 			if(globalMemory.containsKey(curDeclare.IDENTIFIER().getText()))
 				throwError("CompileError: Define Variable Multiple times(Global) aren't allowed. Variable name: "+curDeclare.IDENTIFIER().getText());
 			else {
@@ -191,7 +202,7 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 		return ret;
 	}
 	@Override 
-	public Integer visitDecl(JackLangParser.DeclContext ctx) { 
+	public Integer visitDeclare(JackLangParser.DeclareContext ctx) { 
 		HashMap<String, Object> curStorage=runtimeStack.get(runtimeStack.size()-1);
 		if(curStorage.containsKey(ctx.IDENTIFIER().getText()))
 			throwError("CompilerError: Define Variable Multiple times(Local Stack) aren't allowed. Variable name: "+ctx.IDENTIFIER().getText());
@@ -300,14 +311,14 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 			printSpace();
 			return 0;
 		}
-		JackLangParser.ParasContext parasCon=(JackLangParser.ParasContext)functionList.get(funName).parameters();
+		JackLangParser.ParametersContext parasCon=functionList.get(funName).parameters();
 		HashMap<String,Object> storage=createRuntimeStorage();
 		if(parasCon!=null&&ctx.exprList()!=null) {
-			if(parasCon.declare().size()!=ctx.exprList().expr().size()) 
+			if(parasCon.parameter().size()!=ctx.exprList().expr().size()) 
 				throwError("CompileError: The number of arguments and parameters are different! Function name: "+funName);
-			for(int i=0;i<parasCon.declare().size();i++) {
+			for(int i=0;i<parasCon.parameter().size();i++) {
 				storage.put(
-						((JackLangParser.DeclContext)parasCon.declare(i)).IDENTIFIER().getText(),
+						parasCon.parameter(i).IDENTIFIER().getText(),
 						visit(ctx.exprList().expr(i))
 						);
 			}
@@ -346,6 +357,8 @@ public class JackLangTraversal extends JackLangBaseVisitor<Integer> {
 			return r1*r2;
 		}else if(ctx.op.getType()==JackLangParser.DIV){
 			return r1/r2;
+		}else if(ctx.op.getType()==JackLangParser.MOD) {
+			return r1%r2;
 		} else {
 			throwError("InternalError: visitMULDIV, please report this incident to the developer!");
 			return 0;

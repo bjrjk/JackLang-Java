@@ -16,10 +16,13 @@ public class Main {
         JackLangLexer lexer = new JackLangLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         JackLangParser parser = new JackLangParser(tokens);
-        ParseTree tree = parser.prog();
-        eval.visit(tree);
+        if(parser.getNumberOfSyntaxErrors()>0) {
+        	System.out.println("Syntax Error! Please check!");
+        	System.exit(1);
+        }
+        ParseTree tree = parser.program();
         try {
-        	
+        	eval.visit(tree);
         }catch(Exception e) {
         	System.err.println("An Exception occured, Program terminated.");
         }

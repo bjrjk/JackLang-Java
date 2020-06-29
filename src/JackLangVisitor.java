@@ -10,40 +10,41 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface JackLangVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by the {@code program}
-	 * labeled alternative in {@link JackLangParser#prog}.
+	 * Visit a parse tree produced by {@link JackLangParser#program}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitProgram(JackLangParser.ProgramContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code function}
-	 * labeled alternative in {@link JackLangParser#func}.
+	 * Visit a parse tree produced by {@link JackLangParser#function}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunction(JackLangParser.FunctionContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code paras}
-	 * labeled alternative in {@link JackLangParser#parameters}.
+	 * Visit a parse tree produced by {@link JackLangParser#parameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParas(JackLangParser.ParasContext ctx);
+	T visitParameters(JackLangParser.ParametersContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code varDecl}
-	 * labeled alternative in {@link JackLangParser#varDeclare}.
+	 * Visit a parse tree produced by {@link JackLangParser#parameter}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarDecl(JackLangParser.VarDeclContext ctx);
+	T visitParameter(JackLangParser.ParameterContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code decl}
-	 * labeled alternative in {@link JackLangParser#declare}.
+	 * Visit a parse tree produced by {@link JackLangParser#varDeclare}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDecl(JackLangParser.DeclContext ctx);
+	T visitVarDeclare(JackLangParser.VarDeclareContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JackLangParser#declare}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclare(JackLangParser.DeclareContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code arrayType}
 	 * labeled alternative in {@link JackLangParser#type}.
