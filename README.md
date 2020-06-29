@@ -1,12 +1,10 @@
 # JackLang-Java
 
-JackLang Compiler in Java.
+JackLang Interpreter in Java.
 
-JackLang is an interpreted language.
+Frontend by ANTLR v4.8, Backend by Java.
 
-Frontend by ANTLR, Backend by Java.
-
-## Introduction
+## JackLang Introduction
 
 DataType: int, int[] (Single Dimensional Array)
 
